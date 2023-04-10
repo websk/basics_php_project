@@ -1,10 +1,11 @@
 <?php
-$mysqli = mysqli_connect("127.0.0.1", "root", "root", "programming_courses");
-/*
+$mysqli = mysqli_connect("127.0.0.1", "ranepauser", "12345", "programming_courses");
+
 if ($mysqli === false) {
     echo "Ошибка: Невозможно подключиться к MySQL " . mysqli_connect_error();
 }
 
+/*
 $languages = [];
 $query = "SELECT language_name FROM programming_languages LIMIT 10";
 $stmt = mysqli_prepare($mysqli, $query);
@@ -36,9 +37,4 @@ try {
     throw $exception;
 }
 */
-
-$db = new PDO("mysql:host=127.0.0.1;dbname=programming_courses", "root", "root");
-
-$stmt = $db->prepare("SELECT language_name FROM programming_languages WHERE short_language_name = ?");
-$stmt->execute(['php']);
-$stmt->debugDumpParams();
+;
