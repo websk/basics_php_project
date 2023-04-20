@@ -1,5 +1,6 @@
 <?php
 require "sanitize.php";
+require "mysqli.php";
 
 const EDUCATION_SCHOOL = 'school';
 const EDUCATION_HIGHER = 'higher';
@@ -34,9 +35,23 @@ function render_form()
 
         <p>
             <b>Хочу изучить:</b><br>
-            <label>PHP <input type="checkbox" name="languages[]" value="php" checked="checked"></label>
-            <label>Python <input type="checkbox" name="languages[]" value="python"></label>
-            <label>GoLang <input type="checkbox" name="languages[]" value="go"></label>
+            <?php
+            $mysqli = db_connect();
+            $query = "SELECT language_name, short_language_name FROM programming_languages ORDER BY language_name";
+            $statement = mysqli_prepare($mysqli, $query);
+            mysqli_stmt_execute($statement);
+            $result = mysqli_stmt_get_result($statement);
+
+            if ($result !== false) {
+                while ($row = mysqli_fetch_assoc($result)) {
+                    $checked = '';
+                    if ($row['short_language_name'] == 'php') {
+                        $checked = ' checked="checked"';
+                    }
+                    echo '<label>' . $row['language_name'] . ' <input type="checkbox" name="languages[]" value="' . $row['short_language_name'] . '"' . $checked . '></label>';
+                }
+            }
+            ?>
         </p>
 
         <p>
@@ -72,17 +87,17 @@ function process_form(): string
     $education = array_key_exists('education', $_POST) ? $_POST['education'] : '';
     $filtered_education = filter_string($education);
 
-    $languages_arr = array_key_exists('languages', $_POST) ? $_POST['languages'] : [];
-    $filtered_languages_arr = [];
+    $short_languages_names_arr = array_key_exists('languages', $_POST) ? $_POST['languages'] : [];
+    $filtered_short_languages_names_arr = [];
 
-    foreach ($languages_arr as $language) {
-        $filtered_language = filter_string($language);
+    foreach ($short_languages_names_arr as $short_language) {
+        $filtered_short_language = filter_string($short_language);
 
-        if (!$filtered_language) {
+        if (!$filtered_short_language) {
             continue;
         }
 
-        $filtered_languages_arr[] = $filtered_language;
+        $filtered_short_languages_names_arr[] = $filtered_short_language;
     }
 
     $time_for_learning = array_key_exists('time_for_learning', $_POST) ? $_POST['time_for_learning'] : '';
@@ -105,11 +120,11 @@ function process_form(): string
         $errors_arr[] = 'Вы не заполнили образование';
     }
 
-    if (!$filtered_languages_arr) {
+    if (!$filtered_short_languages_names_arr) {
         $errors_arr[] = 'Вы не выбрали ни один язык программирования';
     }
 
-    if (count($languages_arr) != count($filtered_languages_arr)) {
+    if (count($short_languages_names_arr) != count($filtered_short_languages_names_arr)) {
         $errors_arr[] = 'Вы не корректно указали языки программирования';
     }
 
@@ -119,19 +134,52 @@ function process_form(): string
 
     $content_html = '';
 
-    if (!$errors_arr) {
-        $content_html = '<h2>' . $filtered_username . ', Ваша заявка принята, спасибо!</h2>';
+    if ($errors_arr) {
+        $content_html .= '<p>';
+        $content_html .= implode('<br>', $errors_arr);
+        $content_html .= '</p>';
 
         return $content_html;
     }
 
-    $content_html .= '<p>';
-    $content_html .= implode('<br>', $errors_arr);
-    $content_html .= '</p>';
+    foreach ($filtered_short_languages_names_arr as $filtered_short_language) {
+        $request_id = add_request_for_training_to_db($filtered_username, $filtered_about_me, $filtered_short_language, $filtered_email);
+        if ($request_id === false) {
+            continue;
+        }
+
+        $content_html .= '<h2>' . $filtered_username . ', Ваша заявка ' . $request_id . ' принята, спасибо!</h2>';
+    }
 
     return $content_html;
 }
 
+function add_request_for_training_to_db(string $username, string $about_me, string $short_language_name, string $email): bool|int
+{
+    $mysqli = db_connect();
+
+    $query = "SELECT id FROM programming_languages WHERE short_language_name = ?";
+    $statement = mysqli_prepare($mysqli, $query);
+    mysqli_stmt_bind_param($statement, 's', ...[$short_language_name]);
+    mysqli_stmt_execute($statement);
+    $result = mysqli_stmt_get_result($statement);
+
+    if ($result === false) {
+        return false;
+    }
+
+    $row = mysqli_fetch_assoc($result);
+    $programming_language_id = $row['id'];
+
+    $query = "INSERT INTO request_for_training SET username = ?, about_me = ?, programming_language_id = ?, email = ?";
+    $statement = mysqli_prepare($mysqli, $query);
+    mysqli_stmt_bind_param($statement, 'ssis', ...[$username, $about_me, $programming_language_id, $email]);
+    mysqli_stmt_execute($statement);
+
+    $request_id = mysqli_insert_id($mysqli);
+
+    return $request_id;
+}
 ?>
 <html lang="ru">
 <head>
