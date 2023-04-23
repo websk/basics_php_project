@@ -1,5 +1,5 @@
 <?php
-const MYSQL_HOSTNAME = 'localhost';
+const MYSQL_HOSTNAME = 'mysql';
 const MYSQL_USERNAME = 'ranepauser';
 const MYSQL_PASSWORD = '12345';
 const MYSQL_DATABASE = 'programming_courses';

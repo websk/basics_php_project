@@ -184,7 +184,7 @@ function add_request_for_training_to_db(string $username, string $about_me, stri
 <html lang="ru">
 <head>
     <meta charset="utf-8">
-    <title>Заявка на обучение по программированию</title>
+    <title>Курсы по изучению языков программирования - Заявка</title>
 </head>
 <body>
 
