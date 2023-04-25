@@ -20,3 +20,18 @@ function db_connect(): mysqli
 
     return $mysqli;
 }
+
+function fetch_all_from_query(string $query): array
+{
+    $mysqli = db_connect();
+
+    $statement = mysqli_prepare($mysqli, $query);
+    mysqli_stmt_execute($statement);
+    $result = mysqli_stmt_get_result($statement);
+
+    if ($result === false) {
+        return [];
+    }
+
+    return mysqli_fetch_all($result, MYSQLI_ASSOC);
+}
