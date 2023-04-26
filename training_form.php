@@ -72,15 +72,33 @@ function render_form()
 
 function process_form(): string
 {
+    $errors_arr = [];
+
+    // username
     $username = array_key_exists('username', $_POST) ? $_POST['username'] : '';
     $filtered_username = filter_string($username);
 
+    if (!$filtered_username) {
+        $errors_arr[] = 'Вы не представились';
+    }
+
+    // email
     $email = array_key_exists('email', $_POST) ? $_POST['email'] : '';
     $filtered_email = filter_email($email);
 
+    if (!$filtered_email) {
+        $errors_arr[] = 'Вы не указали Email';
+    }
+
+    // education
     $education_short_name = array_key_exists('education', $_POST) ? $_POST['education'] : '';
     $filtered_education_short_name = filter_string($education_short_name);
 
+    if (!get_education_id_by_short_name($filtered_education_short_name)) {
+        $errors_arr[] = 'Некорректное значение для образования';
+    }
+
+    // languages
     $short_languages_names_arr = array_key_exists('languages', $_POST) ? $_POST['languages'] : [];
     $filtered_short_languages_names_arr = [];
 
@@ -98,26 +116,6 @@ function process_form(): string
         $filtered_short_languages_names_arr[] = $filtered_short_language;
     }
 
-    $learning_time_short_name = array_key_exists('learning_time', $_POST) ? $_POST['learning_time'] : '';
-    $filtered_learning_time_short_name = filter_string($learning_time_short_name);
-
-    $about_me = array_key_exists('about_me', $_POST) ? $_POST['about_me'] : '';
-    $filtered_about_me = filter_string($about_me);
-
-    $errors_arr = [];
-
-    if (!$filtered_username) {
-        $errors_arr[] = 'Вы не представились';
-    }
-
-    if (!$filtered_email) {
-        $errors_arr[] = 'Вы не указали Email';
-    }
-
-    if (!get_education_id_by_short_name($filtered_education_short_name)) {
-        $errors_arr[] = 'Некорректное значение для образования';
-    }
-
     if (!$filtered_short_languages_names_arr) {
         $errors_arr[] = 'Вы не выбрали ни один язык программирования';
     }
@@ -125,6 +123,11 @@ function process_form(): string
     if (count($short_languages_names_arr) != count($filtered_short_languages_names_arr)) {
         $errors_arr[] = 'Вы не корректно указали языки программирования';
     }
+
+
+    // learning_time
+    $learning_time_short_name = array_key_exists('learning_time', $_POST) ? $_POST['learning_time'] : '';
+    $filtered_learning_time_short_name = filter_string($learning_time_short_name);
 
     if (!$filtered_learning_time_short_name) {
         $errors_arr[] = 'Вы не выбрали время для обучения';
@@ -134,8 +137,13 @@ function process_form(): string
         $errors_arr[] = 'Некорректное значение для времени обучения';
     }
 
+    // about_me
+    $about_me = array_key_exists('about_me', $_POST) ? $_POST['about_me'] : '';
+    $filtered_about_me = filter_string($about_me);
+
     $content_html = '';
 
+    // Проверяем, есть ли ошибки
     if ($errors_arr) {
         $content_html .= '<p>';
         $content_html .= implode('<br>', $errors_arr);
@@ -144,6 +152,7 @@ function process_form(): string
         return $content_html;
     }
 
+    // Добавляем данные заявки в БД
     foreach ($filtered_short_languages_names_arr as $filtered_short_language) {
         $request_id = add_request_for_training_to_db(
             $filtered_username,
