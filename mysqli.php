@@ -1,5 +1,5 @@
 <?php
-const MYSQL_HOSTNAME = 'mysql';
+const MYSQL_HOSTNAME = 'localhost';
 const MYSQL_USERNAME = 'ranepauser';
 const MYSQL_PASSWORD = '12345';
 const MYSQL_DATABASE = 'programming_courses';
@@ -15,7 +15,7 @@ function db_connect(): mysqli
     $mysqli = mysqli_connect(MYSQL_HOSTNAME, MYSQL_USERNAME, MYSQL_PASSWORD, MYSQL_DATABASE);
 
     if ($mysqli === false) {
-        throw new \Exception('Неудачная попытка соединения' . mysqli_connect_error());
+        throw new Exception('Неудачная попытка соединения ' . mysqli_connect_error());
     }
 
     return $mysqli;
@@ -27,6 +27,7 @@ function fetch_all_from_query(string $query): array
 
     $statement = mysqli_prepare($mysqli, $query);
     mysqli_stmt_execute($statement);
+
     $result = mysqli_stmt_get_result($statement);
 
     if ($result === false) {

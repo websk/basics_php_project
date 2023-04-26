@@ -1,32 +1,9 @@
 <?php
 require "sanitize.php";
-require "mysqli.php";
+require "programming_courses_repository.php";
 
 const EDUCATION_SCHOOL = 'school';
-
 const PROGRAMMING_LANGUAGE_PHP = 'php';
-
-function get_programming_languages_arr(): array
-{
-    $query = "SELECT language_name, short_language_name FROM programming_languages ORDER BY language_name";
-
-    return fetch_all_from_query($query);
-}
-
-function get_educations_arr(): array
-{
-    $query = "SELECT title, short_name FROM educations ORDER BY title";
-
-    return fetch_all_from_query($query);
-}
-
-function get_learning_times_arr(): array
-{
-    $query = "SELECT title, short_name FROM learning_times ORDER BY title";
-
-    return fetch_all_from_query($query);
-}
-
 
 function render_form()
 {
@@ -43,6 +20,7 @@ function render_form()
             <b>Образование:</b><br>
             <?php
             $educations_arr = get_educations_arr();
+
             foreach ($educations_arr as $education_arr) {
                 $education_checked = ($education_arr['short_name'] == EDUCATION_SCHOOL) ? ' checked' : '';
                 echo '<label>' . $education_arr['title'] . ' <input type="radio" name="education" value="' . $education_arr['short_name'] . '"' . $education_checked . '></label>';
@@ -54,6 +32,7 @@ function render_form()
             <b>Хочу изучить:</b><br>
             <?php
             $programming_languages_arr = get_programming_languages_arr();
+
             foreach ($programming_languages_arr as $programming_language_arr) {
                 $checked = '';
                 if ($programming_language_arr['short_language_name'] == PROGRAMMING_LANGUAGE_PHP) {
@@ -66,11 +45,13 @@ function render_form()
 
         <p>
             <b>Удобное время для обучения:</b><br>
-            <select name="time_for_learning">
+            <select name="learning_time">
                 <option></option>
                 <?php
+
                 $learning_times_arr = get_learning_times_arr();
-                foreach ($learning_times_arr as $learning_time_arr) {
+                foreach ($learning_times_arr as $learning_time_arr)
+                {
                     echo '<option value="' . $learning_time_arr['short_name'] . '">' . $learning_time_arr['title'] . '</option>';
                 }
                 ?>
@@ -110,11 +91,15 @@ function process_form(): string
             continue;
         }
 
+        if (!get_programming_language_id_by_short_language_name($filtered_short_language)) {
+            continue;
+        }
+
         $filtered_short_languages_names_arr[] = $filtered_short_language;
     }
 
-    $time_for_learning = array_key_exists('time_for_learning', $_POST) ? $_POST['time_for_learning'] : '';
-    $filtered_time_for_learning = filter_string($time_for_learning);
+    $learning_time_short_name = array_key_exists('learning_time', $_POST) ? $_POST['learning_time'] : '';
+    $filtered_learning_time_short_name = filter_string($learning_time_short_name);
 
     $about_me = array_key_exists('about_me', $_POST) ? $_POST['about_me'] : '';
     $filtered_about_me = filter_string($about_me);
@@ -130,7 +115,7 @@ function process_form(): string
     }
 
     if (!get_education_id_by_short_name($filtered_education_short_name)) {
-        $errors_arr[] = 'Вы не заполнили образование';
+        $errors_arr[] = 'Некорректное значение для образования';
     }
 
     if (!$filtered_short_languages_names_arr) {
@@ -141,8 +126,12 @@ function process_form(): string
         $errors_arr[] = 'Вы не корректно указали языки программирования';
     }
 
-    if (!get_learning_time_id_by_short_name($filtered_time_for_learning)) {
+    if (!$filtered_learning_time_short_name) {
         $errors_arr[] = 'Вы не выбрали время для обучения';
+    }
+
+    if (!get_learning_time_id_by_short_name($filtered_learning_time_short_name)) {
+        $errors_arr[] = 'Некорректное значение для времени обучения';
     }
 
     $content_html = '';
@@ -162,7 +151,7 @@ function process_form(): string
             $filtered_short_language,
             $filtered_email,
             $filtered_education_short_name,
-            $filtered_time_for_learning
+            $filtered_learning_time_short_name
         );
         if ($request_id === false) {
             continue;
@@ -173,103 +162,11 @@ function process_form(): string
 
     return $content_html;
 }
-
-function add_request_for_training_to_db(
-    string $username,
-    string $about_me,
-    string $short_language_name,
-    string $email,
-    string $education_short_name,
-    string $learning_time_short_name
-): bool|int
-{
-    $programming_language_id = get_programming_language_id_by_short_language_name($short_language_name);
-    if (!$programming_language_id) {
-        return false;
-    }
-
-    $education_id = get_education_id_by_short_name($education_short_name);
-    if (!$education_id) {
-        return false;
-    }
-
-    $learning_time_id = get_learning_time_id_by_short_name($learning_time_short_name);
-    if (!$learning_time_id) {
-        return false;
-    }
-
-    $mysqli = db_connect();
-    $query = "INSERT INTO request_for_training SET username = ?, about_me = ?, programming_language_id = ?, email = ?, education_id = ?, learning_time_id = ?";
-    $statement = mysqli_prepare($mysqli, $query);
-    mysqli_stmt_bind_param($statement, 'ssisii', ...[$username, $about_me, $programming_language_id, $email, $education_id, $learning_time_id]);
-    mysqli_stmt_execute($statement);
-
-    $request_id = mysqli_insert_id($mysqli);
-
-    return $request_id;
-}
-
-function get_education_id_by_short_name(string $education_short_name): ?int
-{
-    $mysqli = db_connect();
-
-    $query = "SELECT id FROM educations WHERE short_name = ?";
-    $statement = mysqli_prepare($mysqli, $query);
-    mysqli_stmt_bind_param($statement, 's', ...[$education_short_name]);
-    mysqli_stmt_execute($statement);
-    $result = mysqli_stmt_get_result($statement);
-
-    if ($result === false) {
-        return null;
-    }
-
-    $row = mysqli_fetch_assoc($result);
-
-    return $row['id'];
-}
-
-function get_learning_time_id_by_short_name(string $learning_time_short_name): ?int
-{
-    $mysqli = db_connect();
-
-    $query = "SELECT id FROM learning_times WHERE short_name = ?";
-    $statement = mysqli_prepare($mysqli, $query);
-    mysqli_stmt_bind_param($statement, 's', ...[$learning_time_short_name]);
-    mysqli_stmt_execute($statement);
-    $result = mysqli_stmt_get_result($statement);
-
-    if ($result === false) {
-        return null;
-    }
-
-    $row = mysqli_fetch_assoc($result);
-
-    return $row['id'];
-}
-
-function get_programming_language_id_by_short_language_name(string $short_language_name): ?int
-{
-    $mysqli = db_connect();
-
-    $query = "SELECT id FROM programming_languages WHERE short_language_name = ?";
-    $statement = mysqli_prepare($mysqli, $query);
-    mysqli_stmt_bind_param($statement, 's', ...[$short_language_name]);
-    mysqli_stmt_execute($statement);
-    $result = mysqli_stmt_get_result($statement);
-
-    if ($result === false) {
-        return null;
-    }
-
-    $row = mysqli_fetch_assoc($result);
-
-    return $row['id'];
-}
 ?>
 <html lang="ru">
 <head>
     <meta charset="utf-8">
-    <title>Курсы по изучению языков программирования - Заявка</title>
+    <title>Заявка на обучение по программированию</title>
 </head>
 <body>
 

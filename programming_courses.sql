@@ -10,7 +10,7 @@ CREATE TABLE `educations`
     `title`      varchar(255) NOT NULL,
     `short_name` varchar(50)  NOT NULL,
     PRIMARY KEY (`id`),
-    UNIQUE KEY `education_short_name` (`short_name`)
+    UNIQUE KEY `short_name` (`short_name`)
 ) ENGINE = InnoDB;
 
 INSERT INTO `educations` (`id`, `title`, `short_name`)
@@ -56,6 +56,8 @@ CREATE TABLE `request_for_training`
     `education_id`            int          NOT NULL,
     `email`                   varchar(50)  NOT NULL,
     PRIMARY KEY (`id`),
-    UNIQUE KEY `email` (`email`),
-    KEY `programming_language_id` (`programming_language_id`)
+    KEY `email` (`email`),
+    KEY `education_id` (`education_id`),
+    KEY `programming_language_id` (`programming_language_id`),
+    KEY `learning_time_id` (`learning_time_id`)
 ) ENGINE = InnoDB;
