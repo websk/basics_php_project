@@ -1,15 +1,6 @@
 <?php
 $filename = 'educations.csv';
 
-$fp = fopen($filename, 'a');
-if ($fp) {
-    $row_str = PHP_EOL . '4;Специальное;special';
-
-    fwrite($fp, $row_str);
-
-    fclose($fp);
-}
-
 $fp = fopen($filename, 'r');
 
 if ($fp) {
@@ -20,6 +11,25 @@ if ($fp) {
 
         echo '---' . PHP_EOL;
     }
+
+    fclose($fp);
+}
+
+$fp = fopen($filename, 'a');
+if ($fp) {
+    $row_str = PHP_EOL . '4;Специальное;special';
+
+    fwrite($fp, $row_str);
+
+    fclose($fp);
+}
+
+
+$fp = fopen($filename, 'a');
+if ($fp) {
+    $row = [4, 'Специальное', 'special'];
+
+    fputcsv($fp, $row, ';');
 
     fclose($fp);
 }

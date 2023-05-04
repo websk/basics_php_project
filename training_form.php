@@ -156,7 +156,9 @@ function process_form(): string
     $about_me = array_key_exists('about_me', $_POST) ? $_POST['about_me'] : '';
     $filtered_about_me = filter_string($about_me);
 
-    upload_user_photo();
+    if (!upload_user_photo()) {
+        $errors_arr[] = 'Не удалось загрузить фотографию';
+    }
 
     $content_html = '';
 
