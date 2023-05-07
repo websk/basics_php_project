@@ -83,22 +83,20 @@ function get_learning_time_id_by_short_name(string $learning_time_short_name): ?
 }
 
 function add_request_for_training_to_db(
-    string $username,
-    string $about_me,
+    int $user_id,
     int $programming_language_id,
-    string $email,
     ?int $learning_time_id = null,
     ?int $education_id = null
 ): bool|int
 {
     $mysqli = db_connect();
 
-    $query = "INSERT INTO request_for_training SET username = ?, about_me = ?, programming_language_id = ?, email = ?, learning_time_id = ?, education_id = ?";
+    $query = "INSERT INTO request_for_training SET user_id = ?, programming_language_id = ?, learning_time_id = ?, education_id = ?";
     $statement = mysqli_prepare($mysqli, $query);
     mysqli_stmt_bind_param(
         $statement,
-        'ssisii',
-        ...[$username, $about_me, $programming_language_id, $email, $learning_time_id, $education_id]
+        'iiii',
+        ...[$user_id, $programming_language_id, $learning_time_id, $education_id]
     );
     mysqli_stmt_execute($statement);
 

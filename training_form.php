@@ -1,6 +1,7 @@
 <?php
 require "sanitize.php";
 require "programming_courses_repository.php";
+require "auth.php";
 
 const EDUCATION_SCHOOL = 'school';
 const PROGRAMMING_LANGUAGE_PHP = 'php';
@@ -8,15 +9,7 @@ const PROGRAMMING_LANGUAGE_PHP = 'php';
 function render_form()
 {
     ?>
-    <form action="" method="POST" name="training_form" enctype="multipart/form-data">
-        <p>
-            <input type="text" name="username" size="100" maxlength="100" placeholder="Представьтесь пожалуйста"
-                   required>
-        </p>
-        <p>
-            <input type="text" name="email" size="100" maxlength="50" placeholder="Введите Email" required>
-        </p>
-
+    <form action="" method="POST" name="training_form">
         <p>
             <b>Образование:</b><br>
             <?php
@@ -59,14 +52,6 @@ function render_form()
         </p>
 
         <p>
-            <b>Немного о себе:</b><br>
-            <textarea name="about_me" cols="80" rows="10"></textarea>
-        </p>
-        <p>
-            <b>Ваша фотография:</b><br>
-            <input type="file" name="user_photo">
-        </p>
-        <p>
             <input type="submit" value="Отправить заявку">
         </p>
     </form>
@@ -76,22 +61,6 @@ function render_form()
 function process_form(): string
 {
     $errors_arr = [];
-
-    $username = array_key_exists('username', $_POST) ? $_POST['username'] : '';
-    $filtered_username = filter_string($username);
-
-    if (!$filtered_username) {
-        $errors_arr[] = 'Вы не представились';
-    }
-
-
-    $email = array_key_exists('email', $_POST) ? $_POST['email'] : '';
-    $filtered_email = filter_email($email);
-
-    if (!$filtered_email) {
-        $errors_arr[] = 'Вы не указали Email';
-    }
-
 
     $education_short_name = array_key_exists('education', $_POST) ? $_POST['education'] : '';
     $filtered_education_short_name = filter_string($education_short_name);
@@ -152,14 +121,6 @@ function process_form(): string
         }
     }
 
-
-    $about_me = array_key_exists('about_me', $_POST) ? $_POST['about_me'] : '';
-    $filtered_about_me = filter_string($about_me);
-
-    if (!upload_user_photo()) {
-        $errors_arr[] = 'Не удалось загрузить фотографию';
-    }
-
     $content_html = '';
 
     if ($errors_arr) {
@@ -170,12 +131,14 @@ function process_form(): string
         return $content_html;
     }
 
+    $user_id = get_user_id();
+
+    $user_arr = get_user_arr_by_user_id($user_id);
+
     foreach ($filtered_programming_languages_ids_arr as $programming_language_id) {
         $request_id = add_request_for_training_to_db(
-            $filtered_username,
-            $filtered_about_me,
+            $user_id,
             $programming_language_id,
-            $filtered_email,
             $filtered_learning_time_id,
             $filtered_education_id
         );
@@ -184,29 +147,10 @@ function process_form(): string
             continue;
         }
 
-        $content_html .= '<h2>' . $filtered_username . ', Ваша заявка ' . $request_id . ' принята, спасибо!</h2>';
+        $content_html .= '<h2>' . $user_arr['username'] . ', Ваша заявка ' . $request_id . ' принята, спасибо!</h2>';
     }
 
     return $content_html;
-}
-
-function upload_user_photo(): bool
-{
-    if (!isset($_FILES['user_photo'])) {
-        return false;
-    }
-
-    $filename = $_FILES['user_photo']['name'];
-    $tmp_path = $_FILES['user_photo']['tmp_name'];
-
-    $photo_dir = 'photo';
-    if (!file_exists($photo_dir)) {
-        mkdir($photo_dir);
-    }
-
-    $new_path =  __DIR__ . DIRECTORY_SEPARATOR. $photo_dir . DIRECTORY_SEPARATOR . $filename;
-
-    return move_uploaded_file($tmp_path, $new_path);
 }
 ?>
 <html lang="ru">
