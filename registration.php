@@ -1,6 +1,5 @@
 <?php
 require "sanitize.php";
-require "mysqli.php";
 require "auth.php";
 
 function render_registration_form()
@@ -105,11 +104,9 @@ function process_registration_form(): string
         return $content_html;
     }
 
-    $password_hash = generate_password($filtered_password_first);
+    $user_id = registration_user_to_db($filtered_username, $filtered_email, $filtered_password_first, $filtered_about_me, $user_photo);
 
-    $user_id = registration_user_to_db($filtered_username, $filtered_email, $password_hash, $filtered_about_me, $user_photo);
-
-    if ($user_id !== false) {
+    if ($user_id) {
         $content_html .= 'Вы успешно зарегистрировались<br>';
         $content_html .= '<a href="/">Войти на сайт</a>';
     }

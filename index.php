@@ -1,12 +1,6 @@
 <?php
 require "sanitize.php";
-require "mysqli.php";
 require "auth.php";
-
-$user_id = get_user_id();
-if ($user_id) {
-    header('Location: /training_form.php');
-}
 
 function login(): string
 {
@@ -28,7 +22,7 @@ function login(): string
 
     $user_id = get_user_id_by_email_and_password($filtered_email, $filtered_password);
 
-    if ($user_id === false) {
+    if (!$user_id) {
         $errors_arr[] = 'Вы указали неправильный email или пароль для входа';
     }
 
@@ -70,8 +64,13 @@ function render_login_form()
     </form>
 <?php
 }
-?>
 
+
+$user_id = get_user_id();
+if ($user_id) {
+    header('Location: /training_form.php');
+}
+?>
 
 <!DOCTYPE html>
 <html lang="ru"> <head>
