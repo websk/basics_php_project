@@ -15,15 +15,11 @@ function render_registration_form()
         </p>
 
         <p>
-        <div>
             <b>Пароль</b><br>
             <input type="password" name="password_first">
-        </div>
-        <div>
+            <br>
             <b>Подтверждение пароля</b><br>
             <input type="password" name="password_second">
-        </div>
-
         </p>
 
         <p>
@@ -39,6 +35,7 @@ function render_registration_form()
         <p>
             <input type="submit" value="Зарегистрироваться">
         </p>
+
     </form>
 <?php
 }
@@ -62,13 +59,16 @@ function process_registration_form(): string
         $errors_arr[] = 'Вы не указали Email';
     }
 
+    $about_me = array_key_exists('about_me', $_POST) ? $_POST['about_me'] : '';
+    $filtered_about_me = filter_string($about_me);
+
     $password_first = array_key_exists('password_first', $_POST) ? $_POST['password_first'] : '';
     $filtered_password_first = filter_string($password_first);
 
     $password_second = array_key_exists('password_second', $_POST) ? $_POST['password_second'] : '';
     $filtered_password_second = filter_string($password_second);
 
-    if (!$filtered_password_first || !$filtered_password_second) {
+    if (!$password_first || !$password_second) {
         $errors_arr[] = 'Вы не указали пароль';
     }
 
@@ -76,14 +76,10 @@ function process_registration_form(): string
         $errors_arr[] = 'Пароль не подтвержден, либо подтвержден неверно.';
     }
 
-    $about_me = array_key_exists('about_me', $_POST) ? $_POST['about_me'] : '';
-    $filtered_about_me = filter_string($about_me);
-
     $user_photo = upload_user_photo();
     if (!$user_photo) {
         $errors_arr[] = 'Не удалось загрузить фотографию';
     }
-
 
     $content_html = '';
 
@@ -95,12 +91,16 @@ function process_registration_form(): string
         return $content_html;
     }
 
-    $user_id = registration_users_to_db($filtered_username, $filtered_email, $filtered_password_first, $filtered_about_me, $user_photo);
 
-    if ($user_id) {
-        $content_html .= 'Вы успешно зарегистрировались<br>';
-        $content_html .= '<a href="/">Войти на сайт</a>';
+    $user_id = registration_user_to_db($filtered_username, $filtered_email, $filtered_password_first, $filtered_about_me, $user_photo);
+
+    if (!$user_id) {
+        $content_html .= 'Не удалось зарегистрировать пользователя';
+        return $content_html;
     }
+
+    $content_html .= 'Вы успешно зарегистрировались<br>';
+    $content_html .= '<a href="/">Войти на сайт</a>';
 
     return $content_html;
 }
@@ -108,7 +108,7 @@ function process_registration_form(): string
 function upload_user_photo(): ?string
 {
     if (!isset($_FILES['user_photo'])) {
-        return null;
+        return false;
     }
 
     $filename = $_FILES['user_photo']['name'];
@@ -128,20 +128,19 @@ function upload_user_photo(): ?string
     return $filename;
 }
 ?>
-
 <!DOCTYPE html>
 <html lang="ru"> <head>
     <meta charset="UTF-8">
-    <title>Регистрация пользователей</title> </head>
+    <title>Регистрация пользователя</title>
+</head>
 <body>
-
+<h1>Регистрация пользователя</h1>
 <?php
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    echo process_registration_form();
+if ($_SERVER['REQUEST_METHOD'] == "POST") {
+    echo  process_registration_form();
 } else {
     render_registration_form();
 }
-
 ?>
 
 </body>

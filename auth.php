@@ -1,15 +1,25 @@
 <?php
-require_once "mysqli.php";
+require "mysqli.php";
 
-const SECRET_SALT = '3947bv983h[pgqvbqg3iplgvigq4l374gv93h4gv4';
-
+const SECRET_SALT = 'c038gf237g989320fgh23c493bv24hb943h0b43hg';
 const USER_SESSION_COOKIE_NAME = 'user_session';
+
+
+function generate_password_hash(string $password): string
+{
+    return md5(SECRET_SALT . $password);
+}
+
+function generate_user_session_id(int $user_id): string
+{
+    return md5(SECRET_SALT . $user_id);
+}
 
 function get_user_id_by_email_and_password(string $email, string $password): ?int
 {
     $mysqli = db_connect();
 
-    $password_hash = generate_password($password);
+    $password_hash = generate_password_hash($password);
 
     $query = "SELECT id FROM users WHERE email = ? AND password = ?";
     $statement = mysqli_prepare($mysqli, $query);
@@ -18,11 +28,10 @@ function get_user_id_by_email_and_password(string $email, string $password): ?in
     $result = mysqli_stmt_get_result($statement);
 
     if ($result === false) {
-       return null;
+        return null;
     }
 
     $row = mysqli_fetch_assoc($result);
-
     if (!$row) {
         return null;
     }
@@ -32,16 +41,6 @@ function get_user_id_by_email_and_password(string $email, string $password): ?in
     return $user_id;
 }
 
-function generate_user_session_id(int $user_id): string
-{
-    return md5(SECRET_SALT . $user_id);
-}
-
-function generate_password(string $password): string
-{
-    return md5(SECRET_SALT . $password);
-}
-
 function set_user_session_id(int $user_id)
 {
     $session_id = generate_user_session_id($user_id);
@@ -49,14 +48,13 @@ function set_user_session_id(int $user_id)
     setcookie(USER_SESSION_COOKIE_NAME, $session_id, strtotime('+30 days'));
 
     $mysqli = db_connect();
-
     $query = "UPDATE users SET session_id = ? WHERE id = ?";
     $statement = mysqli_prepare($mysqli, $query);
     mysqli_stmt_bind_param($statement, 'si', ...[$session_id, $user_id]);
     mysqli_stmt_execute($statement);
 }
 
-function get_user_id_by_session_id(string $session_id)
+function get_user_id_by_session_id(string $session_id): ?int
 {
     $mysqli = db_connect();
 
@@ -80,9 +78,9 @@ function get_user_id_by_session_id(string $session_id)
     return $user_id;
 }
 
-function get_user_id()
+function get_user_id(): ?int
 {
-    $session_id = array_key_exists(USER_SESSION_COOKIE_NAME, $_COOKIE) ? $_COOKIE[USER_SESSION_COOKIE_NAME] : null;
+    $session_id = array_key_exists(USER_SESSION_COOKIE_NAME, $_COOKIE) ? $_COOKIE[USER_SESSION_COOKIE_NAME]: null;
 
     if (!$session_id) {
         return null;
@@ -93,11 +91,11 @@ function get_user_id()
     return $user_id;
 }
 
-function registration_users_to_db(string $username, string $email, string $password, string $about_me, string $user_photo): int
+function registration_user_to_db(string $username, string $email, string $password, string $about_me, string $user_photo): int
 {
     $mysqli = db_connect();
 
-    $password_hash = generate_password($password);
+    $password_hash = generate_password_hash($password);
 
     $query = "INSERT INTO users SET username = ?, email = ?, password = ?, about_me = ?, user_photo = ?";
     $statement = mysqli_prepare($mysqli, $query);

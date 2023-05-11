@@ -14,11 +14,12 @@ function render_login_form()
             <input type="password" name="password">
         </p>
         <p>
-            <button type="submit">Войти</button>
+            <input type="submit" value="Войти">
         </p>
     </form>
-    <?php
+<?php
 }
+
 
 function login(): string
 {
@@ -59,14 +60,12 @@ function login(): string
     return $content_html;
 }
 
-$session_id = array_key_exists(USER_SESSION_COOKIE_NAME, $_COOKIE) ? $_COOKIE[USER_SESSION_COOKIE_NAME] : null;
 
 $user_id = get_user_id();
 if ($user_id) {
     header('Location: /training_form.php');
 }
 ?>
-
 <!DOCTYPE html>
 <html lang="ru"> <head>
     <meta charset="UTF-8">
