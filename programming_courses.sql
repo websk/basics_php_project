@@ -48,16 +48,28 @@ VALUES (1, 'PHP', 'php'),
 
 CREATE TABLE `request_for_training`
 (
-    `id`                      int          NOT NULL AUTO_INCREMENT,
-    `username`                varchar(100) NOT NULL,
-    `about_me`                text,
+    `id`                      int NOT NULL AUTO_INCREMENT,
+    `user_id`                 int NOT NULL,
     `learning_time_id`        int DEFAULT NULL,
-    `programming_language_id` int          NOT NULL,
-    `education_id`            int          NOT NULL,
-    `email`                   varchar(50)  NOT NULL,
+    `programming_language_id` int NOT NULL,
+    `education_id`            int NOT NULL,
     PRIMARY KEY (`id`),
-    KEY `email` (`email`),
-    KEY `education_id` (`education_id`),
     KEY `programming_language_id` (`programming_language_id`),
-    KEY `learning_time_id` (`learning_time_id`)
+    KEY `learning_time_id` (`learning_time_id`),
+    KEY `education_id` (`education_id`),
+    KEY `user_id` (`user_id`)
+) ENGINE = InnoDB;
+
+CREATE TABLE `users`
+(
+    `id`         int          NOT NULL AUTO_INCREMENT,
+    `username`   varchar(255) NOT NULL,
+    `email`      varchar(100) NOT NULL,
+    `password`   varchar(50)  NOT NULL,
+    `about_me`   text,
+    `session_id` varchar(100) DEFAULT NULL,
+    `user_photo` varchar(255) DEFAULT NULL,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `email` (`email`),
+    KEY `session_id` (`session_id`)
 ) ENGINE = InnoDB;
