@@ -17,6 +17,10 @@ function render_login_form()
             <input type="submit" value="Войти">
         </p>
     </form>
+
+    <p>
+        <a href="registration.php">Регистрация</a>
+    </p>
 <?php
 }
 

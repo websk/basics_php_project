@@ -1,5 +1,5 @@
 <?php
-require "mysqli.php";
+require_once "mysqli.php";
 
 function get_programming_languages_arr(): array
 {

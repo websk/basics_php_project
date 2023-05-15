@@ -55,6 +55,8 @@ function render_form()
             <input type="submit" value="Отправить заявку">
         </p>
     </form>
+
+    <p><a href="/logout.php">Выход</a></p>
     <?php
 }
 
@@ -148,6 +150,7 @@ function process_form(): string
         }
 
         $content_html .= '<h2>' . $user_arr['username'] . ', Ваша заявка ' . $request_id . ' принята, спасибо!</h2>';
+        $content_html .= '<p><a href="/training_form.php">Отправить новую заявку на обучение по программированию</a></p>';
     }
 
     return $content_html;

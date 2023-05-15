@@ -1,5 +1,5 @@
 <?php
-require "mysqli.php";
+require_once "mysqli.php";
 
 const SECRET_SALT = 'c038gf237g989320fgh23c493bv24hb943h0b43hg';
 const USER_SESSION_COOKIE_NAME = 'user_session';
@@ -80,7 +80,7 @@ function get_user_id_by_session_id(string $session_id): ?int
 
 function get_user_id(): ?int
 {
-    $session_id = array_key_exists(USER_SESSION_COOKIE_NAME, $_COOKIE) ? $_COOKIE[USER_SESSION_COOKIE_NAME]: null;
+    $session_id = get_user_session_id();
 
     if (!$session_id) {
         return null;
@@ -89,6 +89,17 @@ function get_user_id(): ?int
     $user_id = get_user_id_by_session_id($session_id);
 
     return $user_id;
+}
+
+function get_user_session_id(): ?string
+{
+    $session_id = array_key_exists(USER_SESSION_COOKIE_NAME, $_COOKIE) ? $_COOKIE[USER_SESSION_COOKIE_NAME]: null;
+
+    if (!$session_id) {
+        return null;
+    }
+
+    return $session_id;
 }
 
 function registration_user_to_db(string $username, string $email, string $password, string $about_me, string $user_photo): int
@@ -105,4 +116,48 @@ function registration_user_to_db(string $username, string $email, string $passwo
     $user_id = mysqli_insert_id($mysqli);
 
     return $user_id;
+}
+
+
+function get_user_arr_by_user_id(int $user_id): ?array
+{
+    $mysqli = db_connect();
+
+    $query = "SELECT id, username, email, about_me, user_photo FROM users WHERE id = ?";
+    $statement = mysqli_prepare($mysqli, $query);
+
+    mysqli_stmt_bind_param($statement, 'i', ...[$user_id]);
+    mysqli_stmt_execute($statement);
+    $result = mysqli_stmt_get_result($statement);
+
+    if ($result === false) {
+        return null;
+    }
+
+    $row = mysqli_fetch_assoc($result);
+
+    if (!$row) {
+        return null;
+    }
+
+    return $row;
+}
+
+function remove_user_session_id(): bool
+{
+    $user_id = get_user_id();
+
+    if (!$user_id) {
+        return false;
+    }
+
+    setcookie(USER_SESSION_COOKIE_NAME, '', strtotime('-1 hour'));
+
+    $mysqli = db_connect();
+    $query = "UPDATE users SET session_id = ? WHERE id = ?";
+    $statement = mysqli_prepare($mysqli, $query);
+    mysqli_stmt_bind_param($statement, 'si', ...[null, $user_id]);
+    mysqli_stmt_execute($statement);
+
+    return true;
 }
