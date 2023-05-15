@@ -73,8 +73,10 @@ if ($user_id) {
 <!DOCTYPE html>
 <html lang="ru"> <head>
     <meta charset="UTF-8">
-    <title>Мой первый скрипт на PHP</title> </head>
+    <title>Курсы по изучению языков программирования</title> </head>
 <body>
+
+<h1>Курсы по изучению языков программирования</h1>
 
 <?php
 if ($_SERVER['REQUEST_METHOD'] == "POST") {
