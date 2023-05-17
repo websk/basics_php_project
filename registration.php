@@ -37,6 +37,10 @@ function render_registration_form()
         </p>
 
     </form>
+
+    <p>
+        <a href="/">Авторизация</a>
+    </p>
 <?php
 }
 
@@ -131,7 +135,7 @@ function upload_user_photo(): ?string
 <!DOCTYPE html>
 <html lang="ru"> <head>
     <meta charset="UTF-8">
-    <title>Регистрация пользователя</title>
+    <title>Курсы по изучению языков программирования - Регистрация пользователя</title>
 </head>
 <body>
 <h1>Регистрация пользователя</h1>

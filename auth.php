@@ -78,9 +78,9 @@ function get_user_id_by_session_id(string $session_id): ?int
     return $user_id;
 }
 
-function get_user_id(): ?int
+function get_current_user_id(): ?int
 {
-    $session_id = get_user_session_id();
+    $session_id = array_key_exists(USER_SESSION_COOKIE_NAME, $_COOKIE) ? $_COOKIE[USER_SESSION_COOKIE_NAME]: null;
 
     if (!$session_id) {
         return null;
@@ -89,17 +89,6 @@ function get_user_id(): ?int
     $user_id = get_user_id_by_session_id($session_id);
 
     return $user_id;
-}
-
-function get_user_session_id(): ?string
-{
-    $session_id = array_key_exists(USER_SESSION_COOKIE_NAME, $_COOKIE) ? $_COOKIE[USER_SESSION_COOKIE_NAME]: null;
-
-    if (!$session_id) {
-        return null;
-    }
-
-    return $session_id;
 }
 
 function registration_user_to_db(string $username, string $email, string $password, string $about_me, string $user_photo): int
@@ -118,14 +107,12 @@ function registration_user_to_db(string $username, string $email, string $passwo
     return $user_id;
 }
 
-
 function get_user_arr_by_user_id(int $user_id): ?array
 {
     $mysqli = db_connect();
 
     $query = "SELECT id, username, email, about_me, user_photo FROM users WHERE id = ?";
     $statement = mysqli_prepare($mysqli, $query);
-
     mysqli_stmt_bind_param($statement, 'i', ...[$user_id]);
     mysqli_stmt_execute($statement);
     $result = mysqli_stmt_get_result($statement);
@@ -135,7 +122,6 @@ function get_user_arr_by_user_id(int $user_id): ?array
     }
 
     $row = mysqli_fetch_assoc($result);
-
     if (!$row) {
         return null;
     }
@@ -145,7 +131,7 @@ function get_user_arr_by_user_id(int $user_id): ?array
 
 function remove_user_session_id(): bool
 {
-    $user_id = get_user_id();
+    $user_id = get_current_user_id();
 
     if (!$user_id) {
         return false;

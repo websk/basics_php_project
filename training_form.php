@@ -9,7 +9,7 @@ const PROGRAMMING_LANGUAGE_PHP = 'php';
 function render_form()
 {
     ?>
-    <form action="" method="POST" name="training_form">
+    <form action="" method="POST" name="training_form" enctype="multipart/form-data">
         <p>
             <b>Образование:</b><br>
             <?php
@@ -56,7 +56,10 @@ function render_form()
         </p>
     </form>
 
-    <p><a href="/logout.php">Выход</a></p>
+    <p>
+        <a href="/training_list.php">Список обучающихся</a>
+        / <a href="/logout.php">Выход</a>
+    </p>
     <?php
 }
 
@@ -67,16 +70,12 @@ function process_form(): string
     $education_short_name = array_key_exists('education', $_POST) ? $_POST['education'] : '';
     $filtered_education_short_name = filter_string($education_short_name);
 
-    $filtered_education_id = null;
+    $filtered_education_id = get_education_id_by_short_name($filtered_education_short_name);
 
     if (!$filtered_education_short_name) {
         $errors_arr[] = 'Вы не заполнили образование';
-    } else {
-        $filtered_education_id = get_education_id_by_short_name($filtered_education_short_name);
-
-        if (!$filtered_education_id) {
-            $errors_arr[] = 'Некорректное значение для образования';
-        }
+    } else if (!$filtered_education_id) {
+        $errors_arr[] = 'Некорректное значение для образования';
     }
 
 
@@ -111,17 +110,14 @@ function process_form(): string
     $learning_time_short_name = array_key_exists('learning_time', $_POST) ? $_POST['learning_time'] : '';
     $filtered_learning_time_short_name = filter_string($learning_time_short_name);
 
-   $filtered_learning_time_id = null;
+   $filtered_learning_time_id = get_learning_time_id_by_short_name($filtered_learning_time_short_name);
 
     if (!$filtered_learning_time_short_name) {
         $errors_arr[] = 'Вы не выбрали время для обучения';
-    } else {
-        $filtered_learning_time_id = get_learning_time_id_by_short_name($filtered_learning_time_short_name);
-
-        if (!$filtered_learning_time_id) {
-            $errors_arr[] = 'Некорректное время для обучения';
-        }
+    } else if (!$filtered_learning_time_id) {
+        $errors_arr[] = 'Некорректное время для обучения';
     }
+
 
     $content_html = '';
 
@@ -133,7 +129,7 @@ function process_form(): string
         return $content_html;
     }
 
-    $user_id = get_user_id();
+    $user_id = get_current_user_id();
 
     $user_arr = get_user_arr_by_user_id($user_id);
 
@@ -150,16 +146,44 @@ function process_form(): string
         }
 
         $content_html .= '<h2>' . $user_arr['username'] . ', Ваша заявка ' . $request_id . ' принята, спасибо!</h2>';
-        $content_html .= '<p><a href="/training_form.php">Отправить новую заявку на обучение по программированию</a></p>';
     }
 
+    $content_html .= '<p>';
+    $content_html .= '<a href="/training_list.php">Список обучающихся</a>';
+    $content_html .= ' / <a href="/training_form.php">Отправить заявку</a>';
+    $content_html .= '</p>';
+
     return $content_html;
+}
+
+function upload_user_photo(): bool
+{
+    if (!isset($_FILES['user_photo'])) {
+        return false;
+    }
+
+    $filename = $_FILES['user_photo']['name'];
+    $tmp_path = $_FILES['user_photo']['tmp_name'];
+
+    $photo_dir = 'photo';
+    if (!file_exists($photo_dir)) {
+        mkdir($photo_dir);
+    }
+
+    $new_path = __DIR__ . DIRECTORY_SEPARATOR . $photo_dir . DIRECTORY_SEPARATOR . $filename;
+
+    return move_uploaded_file($tmp_path, $new_path);
+}
+
+$user_id = get_current_user_id();
+if (!$user_id) {
+    header('Location: /');
 }
 ?>
 <html lang="ru">
 <head>
     <meta charset="utf-8">
-    <title>Заявка на обучение по программированию</title>
+    <title>Курсы по изучению языков программирования - Заявка на обучение</title>
 </head>
 <body>
 
