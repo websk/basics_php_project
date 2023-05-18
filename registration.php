@@ -35,13 +35,12 @@ function render_registration_form()
         <p>
             <input type="submit" value="Зарегистрироваться">
         </p>
-
     </form>
 
     <p>
         <a href="/">Авторизация</a>
     </p>
-<?php
+    <?php
 }
 
 function process_registration_form(): string

@@ -21,7 +21,7 @@ function render_login_form()
     <p>
         <a href="/registration.php">Регистрация</a>
     </p>
-<?php
+    <?php
 }
 
 
@@ -73,7 +73,8 @@ if ($user_id) {
 <!DOCTYPE html>
 <html lang="ru"> <head>
     <meta charset="UTF-8">
-    <title>Курсы по изучению языков программирования</title> </head>
+    <title>Курсы по изучению языков программирования</title>
+</head>
 <body>
 
 <h1>Курсы по изучению языков программирования</h1>

@@ -110,7 +110,7 @@ function process_form(): string
     $learning_time_short_name = array_key_exists('learning_time', $_POST) ? $_POST['learning_time'] : '';
     $filtered_learning_time_short_name = filter_string($learning_time_short_name);
 
-   $filtered_learning_time_id = get_learning_time_id_by_short_name($filtered_learning_time_short_name);
+    $filtered_learning_time_id = get_learning_time_id_by_short_name($filtered_learning_time_short_name);
 
     if (!$filtered_learning_time_short_name) {
         $errors_arr[] = 'Вы не выбрали время для обучения';
@@ -118,6 +118,10 @@ function process_form(): string
         $errors_arr[] = 'Некорректное время для обучения';
     }
 
+    $user_id = get_current_user_id();
+    if (!$user_id) {
+        $errors_arr[] = 'Невозможно отправить заявку';
+    }
 
     $content_html = '';
 
@@ -128,8 +132,6 @@ function process_form(): string
 
         return $content_html;
     }
-
-    $user_id = get_current_user_id();
 
     $user_arr = get_user_arr_by_user_id($user_id);
 

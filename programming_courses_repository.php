@@ -112,12 +112,11 @@ function get_request_for_training_rows(int $programming_language_id, int $learni
     $query = "SELECT users.username, users.user_photo, educations.title AS education_title FROM request_for_training"
         . " LEFT JOIN users ON request_for_training.user_id = users.id"
         . " LEFT JOIN educations ON request_for_training.education_id = educations.id"
-        . " WHERE programming_language_id = ? AND learning_time_id = ?";
+        . " WHERE request_for_training.programming_language_id = ? AND request_for_training.learning_time_id = ?";
 
     $statement = mysqli_prepare($mysqli, $query);
     mysqli_stmt_bind_param($statement, 'ii', ...[$programming_language_id, $learning_time_id]);
     mysqli_stmt_execute($statement);
-
     $result = mysqli_stmt_get_result($statement);
 
     if ($result === false) {

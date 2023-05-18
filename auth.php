@@ -140,6 +140,7 @@ function remove_user_session_id(): bool
     setcookie(USER_SESSION_COOKIE_NAME, '', strtotime('-1 hour'));
 
     $mysqli = db_connect();
+
     $query = "UPDATE users SET session_id = ? WHERE id = ?";
     $statement = mysqli_prepare($mysqli, $query);
     mysqli_stmt_bind_param($statement, 'si', ...[null, $user_id]);
