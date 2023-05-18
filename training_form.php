@@ -156,25 +156,6 @@ function process_form(): string
     return $content_html;
 }
 
-function upload_user_photo(): bool
-{
-    if (!isset($_FILES['user_photo'])) {
-        return false;
-    }
-
-    $filename = $_FILES['user_photo']['name'];
-    $tmp_path = $_FILES['user_photo']['tmp_name'];
-
-    $photo_dir = 'photo';
-    if (!file_exists($photo_dir)) {
-        mkdir($photo_dir);
-    }
-
-    $new_path = __DIR__ . DIRECTORY_SEPARATOR . $photo_dir . DIRECTORY_SEPARATOR . $filename;
-
-    return move_uploaded_file($tmp_path, $new_path);
-}
-
 $user_id = get_current_user_id();
 if (!$user_id) {
     header('Location: /');
