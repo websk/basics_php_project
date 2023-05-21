@@ -1,5 +1,5 @@
 <?php
-$image = imagecreatefrompng('training14_elephant.png');
+$image = imagecreatefrompng('training14_2_elephant.png');
 
 $width = imagesx($image);
 $height = imagesy($image);

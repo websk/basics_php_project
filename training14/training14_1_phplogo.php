@@ -6,6 +6,6 @@
 
 <h1>Логотип PHP</h1>
 
-<img src="training14_elephant.php" alt="PHP" />
+<img src="training14_2_elephant.php" alt="PHP" />
 </body>
 </html>

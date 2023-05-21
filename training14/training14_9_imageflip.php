@@ -1,5 +1,5 @@
 <?php
-$image = imagecreatefrompng('training14_elephant.png');
+$image = imagecreatefrompng('training14_2_elephant.png');
 
 imageflip($image, IMG_FLIP_VERTICAL);
 
