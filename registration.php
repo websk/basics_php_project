@@ -33,6 +33,10 @@ function render_registration_form()
         </p>
 
         <p>
+            <img src="/captcha.php" alt="Captcha" />
+        </p>
+
+        <p>
             <input type="submit" value="Зарегистрироваться">
         </p>
 
