@@ -1,95 +1,94 @@
 <?php
+const CAPTCHA_COOKIE_NAME = 'captcha';
 
-const CAPTCHA_COOKIE_NAME = 'kvaYtnctkHqzTxR2b3Mi';
-
-const FONTS_PATH = __DIR__ . '/fonts/'; // Путь к шрифтам
+const FONTS_PATH = __DIR__ . '/fonts';
 
 const FONTS_ARR = [
-    FONTS_PATH . 'font1.ttf',
-    FONTS_PATH . 'font2.ttf'
+    FONTS_PATH . '/font1.ttf',
+    FONTS_PATH . '/font2.ttf'
 ];
 
-const FONT_SIZE = 14;
+const FONT_SIZE = 16;
 
 const SYMBOLS_NUM = 5;
 
-const CAPTCHA_WIDTH = 140; // Ширина изображения
+const CAPTCHA_WIDTH = 150;
 
-const CAPTCHA_HEIGHT = 40; // Высота изображения
+const CAPTCHA_HEIGHT = 40;
 
 const LETTERS = ['1', '2', '3', '4', '5', '6', '7', '8', '9'];
 
-const FIGURES_ARR = ['50', '70', '90', '110', '130', '150', '170', '190', '210'];
+const COLORS_ARR = [50, 100, 70, 110, 130, 150, 170, 210, 230, 10];
+
+const ANGLE_START = 5;
+
+const ANGLE_END = 20;
+
+const NUMBER_OF_BACKGROUND_SIGNS = 50;
 
 
 $_COOKIE[CAPTCHA_COOKIE_NAME] = '';
 
-$number_of_signs = intval((CAPTCHA_WIDTH * CAPTCHA_HEIGHT) / 150);
+$image = imagecreatetruecolor(CAPTCHA_WIDTH, CAPTCHA_HEIGHT);
 
-$code = [];
+$white = imagecolorallocate($image, 255, 255, 255);
+imagefill($image, 0, 0, $white);
 
-$src = imagecreatetruecolor(CAPTCHA_WIDTH, CAPTCHA_HEIGHT);
+// Рисуем фоновый шум
 
-$fon = imagecolorallocate($src, 255, 255, 255);
-imagefill($src, 0, 0, $fon);
+for ($i = 0; $i < NUMBER_OF_BACKGROUND_SIGNS; $i++) {
 
-// Рисуем фоновый "шум"
+    $color = imagecolorallocatealpha($image, 200, 200, 200, 90);
+    $random_font = FONTS_ARR[mt_rand(0, count(FONTS_ARR) - 1)];
+    $random_letter = LETTERS[mt_rand(0, count(LETTERS) - 1)];
+    $random_size = mt_rand(FONT_SIZE - 3, FONT_SIZE);
+    $random_angle = rand(ANGLE_START, ANGLE_END);
 
-for ($i = 0; $i < $number_of_signs; $i++) {
-    $h = 1;
+    $random_x = mt_rand(CAPTCHA_WIDTH * 0.1, CAPTCHA_WIDTH - 5);
+    $random_y = mt_rand(CAPTCHA_HEIGHT * 0.2, CAPTCHA_HEIGHT - 5);
 
-    $color = imagecolorallocatealpha($src, rand(200, 200), rand(200, 200), rand(200, 200), 100);
-    $font = FONTS_ARR[rand(0, count(FONTS_ARR) - 1)];
-    $letter = mb_strtolower(LETTERS[rand(0, count(LETTERS) - 1)]);
-    $size = rand(FONT_SIZE - 1, FONT_SIZE + 1);
-    $angle = rand(0, 60);
-
-    if ($h == rand(1, 2)) {
-        $angle = rand(360, 300);
-    }
-
-    imagettftext($src, $size, $angle, rand(CAPTCHA_WIDTH * 0.1, CAPTCHA_WIDTH - 20), rand(CAPTCHA_HEIGHT * 0.2, CAPTCHA_HEIGHT - 10), $color, $font, $letter);
+    imagettftext($image, $random_size, $random_angle, $random_x, $random_y, $color, $random_font, $random_letter);
 }
 
-// Выводим основные символы
+$captcha_cookie_arr = [];
 
 for ($i = 0; $i < SYMBOLS_NUM; $i++) {
-    $h = 1; // Ориентир
 
-    $color = imagecolorallocatealpha(
-        $src,
-        FIGURES_ARR[rand(0, count(FIGURES_ARR) - 1)],
-        FIGURES_ARR[rand(0, count(FIGURES_ARR) - 1)],
-        FIGURES_ARR[rand(0, count(FIGURES_ARR) - 1)],
-        rand(10, 30)
+    $random_color = imagecolorallocatealpha(
+        $image,
+        COLORS_ARR[mt_rand(0, count(COLORS_ARR) - 1)],
+        COLORS_ARR[mt_rand(0, count(COLORS_ARR) - 1)],
+        COLORS_ARR[mt_rand(0, count(COLORS_ARR) - 1)],
+        mt_rand(20, 70)
     );
-    $font = FONTS_ARR[rand(0, count(FONTS_ARR) - 1)];
-    $letter = mb_strtolower(LETTERS[rand(0, count(LETTERS) - 1)]);
-    $size = rand(FONT_SIZE * 2.1 - 1, FONT_SIZE * 2.1 + 1);
-    $x = (empty($x)) ? CAPTCHA_WIDTH * 0.08 : $x + (CAPTCHA_WIDTH * 0.8) / SYMBOLS_NUM + rand(0, CAPTCHA_WIDTH * 0.01);
 
-    if ($h == rand(1, 2)) {
-        $y = ((CAPTCHA_HEIGHT * 1.15 * 3) / 4) + rand(0, CAPTCHA_HEIGHT * 0.02);
+    $random_font = FONTS_ARR[mt_rand(0, count(FONTS_ARR) - 1)];
+    $random_letter = mb_strtolower(LETTERS[mt_rand(0, count(LETTERS) - 1)]);
+    $random_size = mt_rand(FONT_SIZE, FONT_SIZE * 2);
+    $random_angle = mt_rand(ANGLE_START, ANGLE_END);
+
+    if (!isset($rand_x)) {
+        $rand_x = CAPTCHA_WIDTH * 0.08;
     } else {
-        $y = ((CAPTCHA_HEIGHT * 1.15 * 3) / 4) - rand(0, CAPTCHA_HEIGHT * 0.02);
+        $rand_x = $rand_x + (CAPTCHA_WIDTH * 0.8) / SYMBOLS_NUM + mt_rand(0,  CAPTCHA_WIDTH * 0.01);
     }
 
-    $angle = rand(5, 20);
-
-    $code[] = $letter;
-
-    if ($h == rand(1, 2)) {
-        $angle = rand(355, 340);
+    if (mt_rand(1, 2) == 1) {
+        $rand_y = (CAPTCHA_HEIGHT * 1.15 * 3) / 4 + mt_rand(0, CAPTCHA_HEIGHT * 0.02);
+    } else {
+        $rand_y = (CAPTCHA_HEIGHT * 1.15 * 3) / 4 - mt_rand(0, CAPTCHA_HEIGHT * 0.02);
     }
 
-    imagettftext($src, $size, $angle, $x, $y, $color, $font, $letter);
+
+    imagettftext($image, $random_size, $random_angle, $rand_x, $rand_y, $random_color, $random_font, $random_letter);
+
+    $captcha_cookie_arr[] = $random_letter;
 }
 
-$captcha = mb_strtolower(implode('', $code));
-
-setcookie(CAPTCHA_COOKIE_NAME, $captcha, 0, '/');
+$captcha_cookie = implode('', $captcha_cookie_arr);
+setcookie(CAPTCHA_COOKIE_NAME, $captcha_cookie, 0, '/');
 
 header('Content-type: image/png');
 
-imagepng($src);
-imagedestroy($src);
+imagepng($image);
+imagedestroy($image);

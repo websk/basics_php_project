@@ -29,11 +29,13 @@ function render_registration_form()
 
         <p>
             <b>Ваша фотография:</b><br>
-            <input type="file" name="user_photo">
+            <input type="file" name="user_photo" required>
         </p>
 
         <p>
-            <img src="/captcha.php" alt="Captcha" />
+            <b>Введите код, изображенный на картинке</b><br>
+            <img src="/captcha.php" alt="Captcha" title="Введите этот защитный код">
+            <input type="text" name="captcha" size="5" required>
         </p>
 
         <p>
@@ -88,6 +90,14 @@ function process_registration_form(): string
         $errors_arr[] = 'Не удалось загрузить фотографию';
     }
 
+    $captcha = array_key_exists('captcha', $_POST) ? $_POST['captcha'] : '';
+    $captcha_cookie = array_key_exists('captcha', $_COOKIE) ? $_COOKIE['captcha'] : '';
+
+    if ($captcha != $captcha_cookie) {
+        $errors_arr[] = 'Вы неверно ввели код, изображенный на картинке';
+    }
+
+
     $content_html = '';
 
     if ($errors_arr) {
@@ -132,7 +142,53 @@ function upload_user_photo(): ?string
         return null;
     }
 
+    resize_image($new_path, $new_path, 200, 80);
+
     return $filename;
+}
+
+function resize_image(string $src, string $dest, int $width_resize_value, int $quality): bool
+{
+    if (!file_exists($src)) {
+        return false;
+    }
+
+    $size_arr = getimagesize($src);
+    if ($size_arr === false) {
+        return false;
+    }
+
+    $format = strtolower(substr($size_arr['mime'], strpos($size_arr['mime'], '/') + 1));
+    $image_func = "imagecreatefrom" . $format;
+
+    if (!function_exists($image_func)) {
+        return false;
+    }
+
+    $image_src = $image_func($src);
+
+    $width_dest = $width_resize_value;
+    $ratio = $size_arr[0] / $width_dest;
+    $height_dest = round($size_arr[1] / $ratio);
+
+    $image_dest = imagecreatetruecolor($width_dest, $height_dest);
+    $white = imagecolorallocate($image_dest, 255, 255, 255);
+    imagefill($image_dest, 0, 0,$white);
+
+    imagecopyresampled($image_dest, $image_src, 0, 0, 0, 0, $width_dest, $height_dest, $size_arr[0], $size_arr[1]);
+
+    $format_func = 'image' . $format;
+
+    if ($format == 'png') {
+        $quality = ceil($quality / 10);
+    }
+
+    $format_func($image_dest, $dest, $quality);
+
+    imagedestroy($image_src);
+    imagedestroy($image_dest);
+
+    return true;
 }
 ?>
 <!DOCTYPE html>
