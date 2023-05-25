@@ -90,6 +90,7 @@ function process_registration_form(): string
         $errors_arr[] = 'Не удалось загрузить фотографию';
     }
 
+
     $captcha = array_key_exists('captcha', $_POST) ? $_POST['captcha'] : '';
     $captcha_cookie = array_key_exists('captcha', $_COOKIE) ? $_COOKIE['captcha'] : '';
 
@@ -158,8 +159,8 @@ function resize_image(string $src, string $dest, int $width_resize_value, int $q
         return false;
     }
 
-    $format = strtolower(substr($size_arr['mime'], strpos($size_arr['mime'], '/') + 1));
-    $image_func = "imagecreatefrom" . $format;
+    $format = substr($size_arr['mime'], strpos($size_arr['mime'], '/') +1);
+    $image_func = 'imagecreatefrom' . $format;
 
     if (!function_exists($image_func)) {
         return false;
@@ -167,29 +168,33 @@ function resize_image(string $src, string $dest, int $width_resize_value, int $q
 
     $image_src = $image_func($src);
 
-    $width_dest = $width_resize_value;
-    $ratio = $size_arr[0] / $width_dest;
-    $height_dest = round($size_arr[1] / $ratio);
+    $dest_width = $width_resize_value;
+    $ratio = $size_arr[0] / $dest_width;
+    $dest_height = round($size_arr[1] / $ratio);
 
-    $image_dest = imagecreatetruecolor($width_dest, $height_dest);
+    $image_dest = imagecreatetruecolor($dest_width, $dest_height);
     $white = imagecolorallocate($image_dest, 255, 255, 255);
-    imagefill($image_dest, 0, 0,$white);
+    imagefill($image_dest, 0, 0, $white);
 
-    imagecopyresampled($image_dest, $image_src, 0, 0, 0, 0, $width_dest, $height_dest, $size_arr[0], $size_arr[1]);
+    imagecopyresampled($image_dest, $image_src, 0, 0, 0, 0, $dest_width, $dest_height, $size_arr[0], $size_arr[1]);
 
-    $format_func = 'image' . $format;
+    $format_output_func = 'image' . $format;
+    if (!function_exists($format_output_func)) {
+        return false;
+    }
 
     if ($format == 'png') {
         $quality = ceil($quality / 10);
     }
 
-    $format_func($image_dest, $dest, $quality);
+    $format_output_func($image_dest, $dest, $quality);
 
     imagedestroy($image_src);
     imagedestroy($image_dest);
 
     return true;
 }
+
 ?>
 <!DOCTYPE html>
 <html lang="ru"> <head>
