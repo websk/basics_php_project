@@ -4,6 +4,7 @@ $image = imagecreatetruecolor($size, $size);
 $white = imagecolorallocate($image, 255, 255, 255);
 
 imagefilledrectangle($image, 0, 0, $size - 1, $size - 1, $white);
+
 // три точки прямоугольного треугольника
 $x1 = 10;
 $y1 = 10;
