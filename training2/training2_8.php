@@ -1,5 +1,6 @@
 <?php
 // Локальная область видимости
+
 function updateCounter()
 {
     $counter = 20;
@@ -32,7 +33,8 @@ $counter = 10;
 updateCounter();
 ?>
 <?php
-// global использовать не рекомендуется, правильно передавать значение через параметры функции:
+// global использовать не рекомендуется, правильно передавать значение через параметры функции
+
 function updateCounter($counter)
 {
     if (!isset($counter)) {
@@ -50,6 +52,7 @@ updateCounter($counter);
 
 <?php
 // Статические переменные
+
 function updateCounter()
 {
     static $counter;
@@ -65,5 +68,4 @@ function updateCounter()
 echo updateCounter();
 echo 'ОГО ' . updateCounter();
 echo updateCounter();
-
 

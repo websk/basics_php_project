@@ -1,21 +1,23 @@
 <?php
-$a = [
+// Массивы
+$arr = [
     0 => 1,
     1 => 2,
     2 => 3
 ];
 
-$a = array();
-$a = [];
-$a[0] = 1;
-$a[1] = 2;
-$a[2] = 3;
+$arr = array();
+$arr = [];
+$arr[0] = 1;
+$arr[1] = 2;
+$arr[2] = 3;
 
-print_r($a);
+print_r($arr);
 
 ?>
 
 <?php
+// Ассоциативный массив
 $user_arr = [
     'firstname' => 'Иван',
     'surname' => 'Петров',
@@ -28,6 +30,7 @@ echo $user_arr['name'] . ' Petrov';
 ?>
 
 <?php
+// Объекты
 $user_std_obj = new stdClass();
 $user_std_obj->name = 'Иван';
 $user_std_obj->surname = 'Петров';

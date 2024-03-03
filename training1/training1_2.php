@@ -1,12 +1,15 @@
 <?php
-// Пробелы и разпывы строк
+// Пробелы и разрывы строк
 
-function calculateNumbers($a, $b, $c) {}
+// Нормальное представление
+function calculate_numbers($a, $b, $c) {
+    return $a +$b + $c;
+}
 ?>
 
 <?php
 // Без пробелов
-function calculate_numbers($a,$b,$c){}
+function calculate_numbers($a,$b,$c){return $a+$b+$c;}
 ?>
 
 <?php
@@ -15,7 +18,8 @@ function calculate_numbers(
     $a,
     $b,
     $c
-) {
-
+)
+{
+    return $a + $b + $c;
 }
 ?>
