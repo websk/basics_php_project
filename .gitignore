@@ -3,3 +3,4 @@ var/logs
 var/data
 /photo
 .ai
+.vscode
