@@ -15,7 +15,7 @@ $y3 = $size - 10;
 $black = imagecolorallocate($image, 0, 0, 0);
 $points = array($x1, $y1, $x2, $y2, $x3, $y3);
 
-imagepolygon($image, $points, count($points) / 2, $black);
+imagepolygon($image, $points, $black);
 
 header('content-type: image/png');
 imagepng($image);

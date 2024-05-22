@@ -2,6 +2,7 @@
     "require": {
         "squizlabs/php_codesniffer": "*",
         "ext-mbstring": "*",
-        "ext-mysqli": "*"
+        "ext-mysqli": "*",
+        "ext-gd": "*"
     }
 }
