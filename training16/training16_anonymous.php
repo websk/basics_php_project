@@ -1,9 +1,5 @@
 <?php
-function my_autoloader(string $class) {
-    include 'classes/' . $class . '.php';
-}
-
-spl_autoload_register('my_autoloader');
+require 'training16_autoloader.php';
 
 $anonymous = new class(1, 'Ivan', 'ivan@mail.ru', 'dc3h49f84f4') extends User {
     public function getUsername(): string
@@ -12,4 +8,4 @@ $anonymous = new class(1, 'Ivan', 'ivan@mail.ru', 'dc3h49f84f4') extends User {
     }
 };
 
-var_dump($anonymous);
+echo $anonymous->getUserName();
